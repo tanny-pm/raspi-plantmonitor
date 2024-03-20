@@ -66,11 +66,11 @@ def connect_wifi() -> network.WLAN:
     wlan.connect(SSID, PASSWORD)
 
     # Wait for connect or fail
-    max_mait = 10
-    while max_mait > 0:
+    max_wait = 20
+    while max_wait > 0:
         if wlan.status() < 0 or wlan.status() >= 3:
             break
-        max_mait -= 1
+        max_wait -= 1
         print("waiting for connection...")
         utime.sleep(1)
 

@@ -7,8 +7,6 @@ class SEN0114:
     Micro Python driver for the SEN0114 Soil Moisture Sensor
     """
 
-    V_REF = 3.3
-
     def __init__(self, adc: ADC):
         self.adc = adc
 
@@ -18,7 +16,7 @@ class SEN0114:
         Read the soil moisture value
         """
         value = self.adc.read_u16()
-        return value / 65535 * self.V_REF
+        return value / 65535
 
 
 if __name__ == "__main__":
