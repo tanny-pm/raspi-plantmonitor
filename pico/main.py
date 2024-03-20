@@ -1,11 +1,9 @@
-import ahtx0
-import charlcd_pico
-import moisture_pico
 import utime
+from lib import ahtx0, charlcd_pico, moisture_pico
 from machine import ADC, I2C, PWM, Pin
 
 # PINS
-PIN_BACKLIGHT = 10
+PIN_BACKLIGHT = 14
 PIN_I2C_SDA = 16
 PIN_I2C_SCL = 17
 PIN_ADC = 26  # ADC0
@@ -33,21 +31,24 @@ backlight.duty_u16(int(65535 * BACKLIGHT_LEVEL))
 
 
 while True:
-    print("\nTemperature: %0.2f C" % temp_sensor.temperature)
-    print("Humidity: %0.2f %%" % temp_sensor.relative_humidity)
-    moisture = int(soil_sensor.moisture * 100)
+    temp: float = min(temp_sensor.temperature, 99.99)
+    hum: float = min(temp_sensor.relative_humidity, 99.99)
+    moisture: int = min(int(soil_sensor.moisture * 100), 100)
     wetness = "DRY"
     if moisture > 50:
         wetness = "WET"
+
+    print("\nTemperature: %0.2f C" % temp)
+    print("Humidity: %0.2f %%" % hum)
     print(f"Moisture: {moisture:03}")
 
     oled.move(0, 0)
-    oled.write(f"{temp_sensor.temperature:0.1f}C")
+    oled.write(f"{temp:0.1f}C")
     oled.move(0, 1)
-    oled.write(f"{temp_sensor.relative_humidity:0.1f}%")
+    oled.write(f"{hum:0.1f}%")
     oled.move(5, 0)
     oled.write(f"{wetness}")
     oled.move(5, 1)
     oled.write(f"{moisture:03}")
 
-    utime.sleep(5)
+    utime.sleep(1)
