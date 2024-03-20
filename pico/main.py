@@ -3,7 +3,7 @@ import urequests as requests
 import utime
 from config import PASSWORD, SSID, TOKEN
 from lib import ahtx0, charlcd_pico, moisture_pico
-from machine import ADC, I2C, PWM, Pin
+from machine import ADC, I2C, PWM, Pin, deepsleep
 
 # INFLUXDB SETTINGS
 URL = "http://raspberrypi:8086"
@@ -13,7 +13,7 @@ DEVICE_ID = "ficus"
 
 # SETTINGS
 BACKLIGHT_LEVEL = 0.3  # 0.0 to 1.0
-INTERVAL = 10  # sec
+INTERVAL = 1  # min
 
 # PINS
 PIN_BACKLIGHT = 14
@@ -92,6 +92,7 @@ def main():
             oled.write(f"{moisture:03}")
 
             # Send values to InfluxDB
+            Pin(23, Pin.OUT).high()
             wlan = connect_wifi()
 
             target_url = f"{URL}/api/v2/write?org={ORG}&bucket={BUCKET}&precision=s"
@@ -101,16 +102,19 @@ def main():
                 "Authorization": f"Token {TOKEN}",
             }
             data = f"plant_sensor,device_id={DEVICE_ID} temperature={float(temp)},humidity={float(hum)},moisture={int(moisture)}"
-
             print("sending...")
             r = requests.post(target_url, data=data, headers=headers)
             print(f"sent ({r.status_code} {r.text}), status = {str(wlan.status())}")
             r.close()
+            wlan.disconnect()
+            wlan.active(False)
 
         except Exception as e:
             print(f"error ({e})")
 
-        utime.sleep(INTERVAL)
+        Pin(23, Pin.OUT).low()
+        backlight.duty_u16(int(0))
+        deepsleep(INTERVAL * 60 * 1000)
 
 
 if __name__ == "__main__":
