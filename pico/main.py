@@ -1,9 +1,11 @@
 import network
 import urequests as requests
 import utime
+from machine import ADC, I2C, PWM, Pin, deepsleep
+import machine
+
 from config import PASSWORD, SSID, TOKEN
 from lib import ahtx0, charlcd_pico, moisture_pico
-from machine import ADC, I2C, PWM, Pin, deepsleep
 
 # INFLUXDB SETTINGS
 URL = "http://raspberrypi:8086"
@@ -76,6 +78,8 @@ def connect_wifi() -> network.WLAN:
 
     # Handle connection error
     if wlan.status() != 3:
+        wlan.disconnect()
+        wlan.active(False)
         raise RuntimeError("network connection failed")
     else:
         print("wifi connected")
@@ -114,6 +118,8 @@ def main():
         display_values(temp, hum, moist, moist_level)
 
         # WiFi connect
+        Pin(23, machine.Pin.OUT).high()  # WiFi module on
+        utime.sleep(0.1)
         wlan = connect_wifi()
 
         # Send values to InfluxDB
@@ -129,6 +135,10 @@ def main():
 
     finally:
         backlight.duty_u16(0)
+        utime.sleep(1)
+        Pin(23, machine.Pin.OUT).low  # Wifi module off
+        utime.sleep(0.1)
+        # Deep sleep start
         deepsleep(INTERVAL * 60 * 1000)
 
 
