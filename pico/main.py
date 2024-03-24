@@ -113,8 +113,7 @@ def main():
         print(f"Moisture: {moist:03}")
         display_values(temp, hum, moist, moist_level)
 
-        # WiFi ON
-        Pin(23, Pin.OUT).high()
+        # WiFi connect
         wlan = connect_wifi()
 
         # Send values to InfluxDB
@@ -129,7 +128,6 @@ def main():
         oled.write(f"{e}")
 
     finally:
-        Pin(23, Pin.OUT).low()
         backlight.duty_u16(0)
         deepsleep(INTERVAL * 60 * 1000)
 
