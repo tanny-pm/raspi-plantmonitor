@@ -1,11 +1,10 @@
+import machine
 import network
 import urequests as requests
 import utime
-from machine import ADC, I2C, PWM, Pin, deepsleep
-import machine
-
 from config import PASSWORD, SSID, TOKEN
 from lib import ahtx0, charlcd_pico, moisture_pico
+from machine import ADC, I2C, PWM, Pin, deepsleep
 
 # INFLUXDB SETTINGS
 URL = "http://raspberrypi:8086"
@@ -15,7 +14,7 @@ DEVICE_ID = "ficus"
 
 # OPTION
 BACKLIGHT_LEVEL = 0.3  # 0.0 to 1.0
-INTERVAL = 1  # minutes
+INTERVAL = 10  # minutes
 
 # PINS
 PIN_BACKLIGHT = 14
@@ -138,6 +137,7 @@ def main():
         utime.sleep(1)
         Pin(23, machine.Pin.OUT).low  # Wifi module off
         utime.sleep(0.1)
+
         # Deep sleep start
         deepsleep(INTERVAL * 60 * 1000)
 
